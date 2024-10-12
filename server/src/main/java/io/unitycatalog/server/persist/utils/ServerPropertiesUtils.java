@@ -1,7 +1,5 @@
 package io.unitycatalog.server.persist.utils;
 
-import io.unitycatalog.server.service.credential.aws.S3StorageConfig;
-import io.unitycatalog.server.service.credential.azure.ADLSStorageConfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -10,9 +8,12 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import lombok.Getter;
-import org.slf4j.Logger;
+
 import org.slf4j.LoggerFactory;
+
+import io.unitycatalog.server.service.credential.aws.S3StorageConfig;
+import io.unitycatalog.server.service.credential.azure.ADLSStorageConfig;
+import lombok.Getter;
 
 public class ServerPropertiesUtils {
 
@@ -57,6 +58,7 @@ public class ServerPropertiesUtils {
       String accessKey = properties.getProperty("s3.accessKey." + i);
       String secretKey = properties.getProperty("s3.secretKey." + i);
       String sessionToken = properties.getProperty("s3.sessionToken." + i);
+      String endpoint = properties.getProperty("s3.endpoint." + i);
       if ((bucketPath == null || region == null || awsRoleArn == null)
           && (accessKey == null || secretKey == null || sessionToken == null)) {
         break;

@@ -173,7 +173,12 @@ object UCSingleCatalog {
         "fs.s3a.session.token" -> awsCredentials.getSessionToken,
         "fs.s3a.path.style.access" -> "true",
         "fs.s3.impl.disable.cache" -> "true",
-        "fs.s3a.impl.disable.cache" -> "true"
+        "fs.s3a.impl.disable.cache" -> "true",
+        "fs.s3a.aws.credentials.provider" -> "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider",
+        "fs.s3a.connection.ssl.enabled" -> "false",
+        "fs.s3a.endpoint" -> "s3.gaia.local",
+        "fs.s3a.endpoint.region" -> "us-east-1",
+        "fs.s3a.signing-algorithm" -> "S3SignerType"
       )
     } else if (scheme == "gs") {
       val gcsCredentials = temporaryCredentials.getGcpOauthToken

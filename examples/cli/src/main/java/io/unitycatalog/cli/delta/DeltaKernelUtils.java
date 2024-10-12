@@ -83,7 +83,15 @@ public class DeltaKernelUtils {
       conf.set("fs.s3a.secret.key", awsTempCredentials.getSecretAccessKey());
       conf.set("fs.s3a.session.token", awsTempCredentials.getSessionToken());
       conf.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");
+      conf.set(
+          "fs.s3a.aws.credentials.provider",
+          "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider");
       conf.set("fs.s3a.path.style.access", "true");
+      conf.set("fs.s3a.connection.ssl.enabled", "false");
+      conf.set("fs.s3a.endpoint", "s3.gaia.local");
+      conf.set("fs.s3a.endpoint.region", "us-east-1");
+      conf.set("fs.s3a.signing-algorithm", "S3SignerType");
+
     } else if (tablePathUri.getScheme().equals("file")) {
       conf.set("fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem");
     } else {

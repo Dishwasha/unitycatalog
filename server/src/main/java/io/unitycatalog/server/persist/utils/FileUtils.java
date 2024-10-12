@@ -123,13 +123,15 @@ public class FileUtils {
     String secretKey = ServerPropertiesUtils.getInstance().getProperty("aws.s3.secretKey");
     String sessionToken = ServerPropertiesUtils.getInstance().getProperty("aws.s3.sessionToken");
     String region = ServerPropertiesUtils.getInstance().getProperty("aws.region");
+    String endpoint = ServerPropertiesUtils.getInstance().getProperty("aws.s3.endpoint");
 
     BasicSessionCredentials sessionCredentials =
         new BasicSessionCredentials(accessKey, secretKey, sessionToken);
     AmazonS3 s3Client =
         AmazonS3ClientBuilder.standard()
             .withCredentials(new AWSStaticCredentialsProvider(sessionCredentials))
-            .withRegion(region)
+            .withEndpointConfiguration(
+                new AmazonS3ClientBuilder.EndpointConfiguration(endpoint, region))
             .build();
 
     if (createOrDelete) {
