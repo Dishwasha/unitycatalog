@@ -4,6 +4,8 @@ import io.unitycatalog.server.exception.BaseException;
 import io.unitycatalog.server.exception.ErrorCode;
 import io.unitycatalog.server.persist.utils.ServerPropertiesUtils;
 import io.unitycatalog.server.service.credential.CredentialContext;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
@@ -15,6 +17,7 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class AwsCredentialVendor {
@@ -28,7 +31,8 @@ public class AwsCredentialVendor {
   }
 
   public Credentials vendAwsCredentials(CredentialContext context) {
-    S3StorageConfig s3StorageConfig = s3Configurations.get(context.getStorageBase());
+    String base = context.getStorageBase();
+    S3StorageConfig s3StorageConfig = s3Configurations.get(base);
     if (s3StorageConfig == null) {
       throw new BaseException(ErrorCode.FAILED_PRECONDITION, "S3 bucket configuration not found.");
     }
@@ -43,24 +47,30 @@ public class AwsCredentialVendor {
     }
 
     // TODO: cache sts client
-    StsClient stsClient = getStsClientForStorageConfig(s3StorageConfig);
+    try {
+      StsClient stsClient = getStsClientForStorageConfig(s3StorageConfig);
 
-    // TODO: Update this with relevant user/role type info once available
-    String roleSessionName = "uc-%s".formatted(UUID.randomUUID());
-    String awsPolicy =
-        AwsPolicyGenerator.generatePolicy(context.getPrivileges(), context.getLocations());
+      // TODO: Update this with relevant user/role type info once available
+      String roleSessionName = "uc-%s".formatted(UUID.randomUUID());
+      String awsPolicy =
+          AwsPolicyGenerator.generatePolicy(context.getPrivileges(), context.getLocations());
 
-    return stsClient
-        .assumeRole(
-            r ->
-                r.roleArn(s3StorageConfig.getAwsRoleArn())
-                    .policy(awsPolicy)
-                    .roleSessionName(roleSessionName)
-                    .durationSeconds((int) Duration.ofHours(1).toSeconds()))
-        .credentials();
+      AssumeRoleResponse response =
+          stsClient.assumeRole(
+              r ->
+                  r.roleArn(s3StorageConfig.getAwsRoleArn())
+                      .policy(awsPolicy)
+                      .roleSessionName(roleSessionName)
+                      .durationSeconds((int) Duration.ofHours(1).toSeconds()));
+      Credentials credentials = response.credentials();
+      return credentials;
+    } catch (java.net.URISyntaxException e) {
+      return null;
+    }
   }
 
-  private StsClient getStsClientForStorageConfig(S3StorageConfig s3StorageConfig) {
+  private StsClient getStsClientForStorageConfig(S3StorageConfig s3StorageConfig)
+      throws URISyntaxException {
     AwsCredentialsProvider credentialsProvider;
     if (s3StorageConfig.getSecretKey() != null && !s3StorageConfig.getAccessKey().isEmpty()) {
       credentialsProvider =
@@ -73,8 +83,10 @@ public class AwsCredentialVendor {
 
     // TODO: should we try and set the region to something configurable or specific to the server
     // instead?
+    URI endpointURI = new URI(s3StorageConfig.getEndpoint());
     return StsClient.builder()
         .credentialsProvider(credentialsProvider)
+        .endpointOverride(endpointURI)
         .region(Region.of(s3StorageConfig.getRegion()))
         .build();
   }

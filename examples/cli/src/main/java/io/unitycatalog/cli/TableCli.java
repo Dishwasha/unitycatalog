@@ -109,12 +109,13 @@ public class TableCli {
   private static void handleTableStorageLocation(
       String storageLocation, List<ColumnInfo> columnInfos) {
     if (!(storageLocation.startsWith("s3://")
+        || storageLocation.startsWith("s3a://")
         || storageLocation.startsWith("file:/")
         || storageLocation.startsWith("/"))) {
       throw new CliException(
           "Storage location must start with s3:// or file:/ or be an absolute local filesystem path.");
     }
-    if (!storageLocation.startsWith("s3://")) {
+    if (!storageLocation.startsWith("s3://") && !storageLocation.startsWith("s3a://")) {
       // local filesystem path
       Path path = getLocalPath(storageLocation);
       // try and initialize the directory and initiate delta log at the location

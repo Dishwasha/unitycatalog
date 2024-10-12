@@ -1,5 +1,7 @@
 package io.unitycatalog.server.persist.utils;
 
+import io.unitycatalog.server.service.credential.aws.S3StorageConfig;
+import io.unitycatalog.server.service.credential.azure.ADLSStorageConfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -8,12 +10,9 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import org.slf4j.LoggerFactory;
-
-import io.unitycatalog.server.service.credential.aws.S3StorageConfig;
-import io.unitycatalog.server.service.credential.azure.ADLSStorageConfig;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServerPropertiesUtils {
 

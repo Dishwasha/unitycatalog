@@ -12,5 +12,5 @@ public class S3StorageConfig {
   private final String accessKey;
   private final String secretKey;
   private final String sessionToken;
-  private final String endpoint;
+  private final String endpoint = "http://s3.gaia.local";
 }
